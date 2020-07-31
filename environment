@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+export CONTECO_LABEL="rest.base - Conteco"
+export CONTECO_DESCRIPTION="ContEco REST base image for InfoMetis REST API client implementations, providing the base functionality using curl."
+
+export CONTECO_TYPE="rest"
+export CONTECO_NAME="base"
+export CONTECO_TAG="v1.0.1"
+export CONTECO_TAG_TYPE="incremental"
+
+export CONTECO_BASE="bash.base"
+export CONTECO_BUILD="image-base"

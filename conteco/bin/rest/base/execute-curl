@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+(
+  export PATH="$CONTECO_EXECUTIONPLANE_APIINTERNALPATH_BASE"
+  . executionplane-invoke "$0 $@"
+  reqFile="$1"
+
+
+  executionplane-info "CONTECO_STATIC_REST_BASE_LOGGING: $CONTECO_STATIC_REST_BASE_LOGGING "
+
+  reqFile="/conteco/pwd/test.request"
+  resFile="/conteco/pwd/test.response"
+  dumpFile="/conteco/pwd/dump"
+
+  if [[ "$CONTECO_STATIC_REST_BASE_LOGGING" == *"REQUEST"* ]] ; then log-request "$reqFile"; fi
+
+  start="$(date +%s%N)"
+  if [[ "$CONTECO_STATIC_REST_BASE_LOGGING" == *"TRACE"* ]] ; then curl -i -sS --trace-ascii $dumpFile http://www.test.com > $resFile; log-trace $dumpFile;
+  else curl -i -sS http://www.test.com > $resFile; fi
+  stop="$(date +%s%N)"
+
+  if [[ "$CONTECO_STATIC_REST_BASE_LOGGING" == *"RESPONSE"* ]] ; then log-response "$reqFile" "$resFile" "$((stop - start))"; fi
+
+  executionplane-complete
+)
