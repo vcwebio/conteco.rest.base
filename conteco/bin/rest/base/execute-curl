@@ -3,22 +3,51 @@
   export PATH="$CONTECO_EXECUTIONPLANE_APIINTERNALPATH_BASE"
   . executionplane-invoke "$0 $@"
   reqFile="$1"
+  resFile="$2"
+  protocol="$3"
+  if [[ "$protocol" == "" ]] ; then protocol="http"; fi
 
+  executionplane-info "CONTECO_STATIC_REST_BASE_CURL_LOGGING: $CONTECO_STATIC_REST_BASE_CURL_LOGGING "
 
-  executionplane-info "CONTECO_STATIC_REST_BASE_LOGGING: $CONTECO_STATIC_REST_BASE_LOGGING "
+  if [[ "$CONTECO_STATIC_REST_BASE_CURL_LOGGING" == *"REQUEST"* ]] ; then log-request $reqFile; fi
 
-  reqFile="/conteco/pwd/test.request"
-  resFile="/conteco/pwd/test.response"
-  dumpFile="/conteco/pwd/dump"
+  # PARSE REQUEST FILE AND BUILD CURL COMMAND STRING
+  lineType="requestLine"
+  while IFS= read -r line; do
+    executionplane-info $line;
+    case $lineType in
+      requestLine)
+        requestMethod="-X $(echo $line | cut -d' ' -f 1 )"
+        requestUrl="$(echo $line | cut -d' ' -f 2 )"
+        lineType="hostName"
+  		;;
+      hostName)
+        requestHost="$(echo $line | cut -d' ' -f 2 )"
+        lineType="header"
+  		;;
+      header)
+        if [[ "$line" != "" ]] ; then requestHeaders="$requestHeaders -H \"$line\"";
+      else requestBody=$(mktemp /tmp/curl.requestBody.XXXXXX); touch $requestBody; lineType="body"; fi
+  		;;
+  		*)
+  			echo $line >> $requestBody
+  		;;
+  	esac
+  done < $reqFile
 
-  if [[ "$CONTECO_STATIC_REST_BASE_LOGGING" == *"REQUEST"* ]] ; then log-request "$reqFile"; fi
+  if [[ "$CONTECO_STATIC_REST_BASE_CURL_LOGGING" == *"TRACE"* ]] ; then dumpFile=$(mktemp /tmp/curl.dump.XXXXXX); curlTrace="--trace-ascii $dumpFile"; fi
+
+  executionplane-info "requestBody: $(cat $requestBody)"
+  executionplane-info "requestHeaders: $requestHeaders"
+  requestHeaders=""
 
   start="$(date +%s%N)"
-  if [[ "$CONTECO_STATIC_REST_BASE_LOGGING" == *"TRACE"* ]] ; then curl -i -sS --trace-ascii $dumpFile http://www.test.com > $resFile; log-trace $dumpFile;
-  else curl -i -sS http://www.test.com > $resFile; fi
+  executionplane curl -i -sS $requestMethod $curlHeaders $requestHeaders -o $resFile $curlTrace $protocol://$requestHost$requestUrl
   stop="$(date +%s%N)"
 
-  if [[ "$CONTECO_STATIC_REST_BASE_LOGGING" == *"RESPONSE"* ]] ; then log-response "$reqFile" "$resFile" "$((stop - start))"; fi
+  if [[ "$CONTECO_STATIC_REST_BASE_CURL_LOGGING" == *"TRACE"* ]] ; then log-trace $dumpFile; rm $dumpFile; fi
+
+  if [[ "$CONTECO_STATIC_REST_BASE_CURL_LOGGING" == *"RESPONSE"* ]] ; then log-response $reqFile $resFile $((stop - start)); fi
 
   executionplane-complete
 )
