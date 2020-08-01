@@ -4,7 +4,7 @@ services:
 
 # START SERVICE rest.base
   rest:
-    image: ${CONTECO_REGISTRY}${CONTECO_REALM_RUNTIME}/conteco.rest.base:v1.0.1
+    image: ${CONTECO_REGISTRY}${CONTECO_REALM_RUNTIME}/conteco.rest.base:v1.0.2
     environment: [${CONTECO_DC_REST_ENVIRONMENT}]
     command: [${CONTECO_DC_REST_COMMAND}]
     volumes: ['${CONTECO_STACKPREFIX}_bash_data_volume:/conteco/pwd'${CONTECO_DC_REST_VOLUMES_MAPPINGS}]

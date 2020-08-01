@@ -5,7 +5,9 @@
   reqFile="$1"
   resFile="$2"
   protocol="$3"
+  port="$4"
   if [[ "$protocol" == "" ]] ; then protocol="http"; fi
+  if [[ "$port" != "" ]] ; then port=":$port"; fi
 
   executionplane-info "CONTECO_STATIC_REST_BASE_CURL_LOGGING: $CONTECO_STATIC_REST_BASE_CURL_LOGGING "
 
@@ -14,7 +16,6 @@
   # PARSE REQUEST FILE AND BUILD CURL COMMAND STRING
   lineType="requestLine"
   while IFS= read -r line; do
-    executionplane-info $line;
     case $lineType in
       requestLine)
         requestMethod="-X $(echo $line | cut -d' ' -f 1 )"
@@ -26,8 +27,8 @@
         lineType="header"
   		;;
       header)
-        if [[ "$line" != "" ]] ; then requestHeaders="$requestHeaders -H \"$line\"";
-      else requestBody=$(mktemp /tmp/curl.requestBody.XXXXXX); touch $requestBody; lineType="body"; fi
+        if [[ "$line" != "" ]] ; then requestHeaders="$requestHeaders -H ${line// /}";
+      else requestBody=$(mktemp /tmp/curl.requestBody.XXXXXX); touch $requestBody; postData="-d @$requestBody"; lineType="body"; fi
   		;;
   		*)
   			echo $line >> $requestBody
@@ -37,12 +38,8 @@
 
   if [[ "$CONTECO_STATIC_REST_BASE_CURL_LOGGING" == *"TRACE"* ]] ; then dumpFile=$(mktemp /tmp/curl.dump.XXXXXX); curlTrace="--trace-ascii $dumpFile"; fi
 
-  executionplane-info "requestBody: $(cat $requestBody)"
-  executionplane-info "requestHeaders: $requestHeaders"
-  requestHeaders=""
-
   start="$(date +%s%N)"
-  executionplane curl -i -sS $requestMethod $curlHeaders $requestHeaders -o $resFile $curlTrace $protocol://$requestHost$requestUrl
+  executionplane curl -i -sS $curlTrace -o $resFile $requestMethod $requestHeaders $postData $protocol://$requestHost$port$requestUrl
   stop="$(date +%s%N)"
 
   if [[ "$CONTECO_STATIC_REST_BASE_CURL_LOGGING" == *"TRACE"* ]] ; then log-trace $dumpFile; rm $dumpFile; fi
