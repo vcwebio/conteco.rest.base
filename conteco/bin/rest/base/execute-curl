@@ -38,6 +38,8 @@
 
   if [[ "$CONTECO_STATIC_REST_BASE_API_LOGGING" == *"TRACE"* ]] ; then dumpFile=$(mktemp /tmp/curl.dump.XXXXXX); curlTrace="--trace-ascii $dumpFile"; fi
 
+  executionplane-info "curl -i -sS $curlTrace -o $resFile $requestMethod $requestHeaders $postData $protocol://$requestHost$port$requestUrl"
+
   start="$(date +%s%N)"
   executionplane curl -i -sS $curlTrace -o $resFile $requestMethod $requestHeaders $postData $protocol://$requestHost$port$requestUrl
   stop="$(date +%s%N)"

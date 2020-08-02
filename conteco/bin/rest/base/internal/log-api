@@ -2,8 +2,6 @@
 reqFile="$1"
 resFile="$2"
 
-executionplane-info "$@"
-
 #request="$(cat $reqFile)"
 #request=$( echo "$request" | jq -sR . )
 

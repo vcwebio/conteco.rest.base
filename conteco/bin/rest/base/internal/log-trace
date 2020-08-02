@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 dumpFile="$1"
 
-executionplane-info "$@"
-
 trace="$(cat $dumpFile)"
 trace=$( echo "$trace" | jq -sR . )
 timestamp=$( to-timestamp )
