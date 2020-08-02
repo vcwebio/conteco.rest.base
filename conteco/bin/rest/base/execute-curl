@@ -9,9 +9,9 @@
   if [[ "$protocol" == "" ]] ; then protocol="http"; fi
   if [[ "$port" != "" ]] ; then port=":$port"; fi
 
-  executionplane-info "CONTECO_STATIC_REST_BASE_CURL_LOGGING: $CONTECO_STATIC_REST_BASE_CURL_LOGGING "
+  executionplane-info "CONTECO_STATIC_REST_BASE_API_LOGGING: $CONTECO_STATIC_REST_BASE_API_LOGGING "
 
-  if [[ "$CONTECO_STATIC_REST_BASE_CURL_LOGGING" == *"REQUEST"* ]] ; then log-request $reqFile; fi
+  if [[ "$CONTECO_STATIC_REST_BASE_API_LOGGING" == *"REQUEST"* ]] ; then log-request $reqFile; fi
 
   # PARSE REQUEST FILE AND BUILD CURL COMMAND STRING
   lineType="requestLine"
@@ -36,15 +36,15 @@
   	esac
   done < $reqFile
 
-  if [[ "$CONTECO_STATIC_REST_BASE_CURL_LOGGING" == *"TRACE"* ]] ; then dumpFile=$(mktemp /tmp/curl.dump.XXXXXX); curlTrace="--trace-ascii $dumpFile"; fi
+  if [[ "$CONTECO_STATIC_REST_BASE_API_LOGGING" == *"TRACE"* ]] ; then dumpFile=$(mktemp /tmp/curl.dump.XXXXXX); curlTrace="--trace-ascii $dumpFile"; fi
 
   start="$(date +%s%N)"
   executionplane curl -i -sS $curlTrace -o $resFile $requestMethod $requestHeaders $postData $protocol://$requestHost$port$requestUrl
   stop="$(date +%s%N)"
 
-  if [[ "$CONTECO_STATIC_REST_BASE_CURL_LOGGING" == *"TRACE"* ]] ; then log-trace $dumpFile; rm $dumpFile; fi
+  if [[ "$CONTECO_STATIC_REST_BASE_API_LOGGING" == *"TRACE"* ]] ; then log-trace $dumpFile; rm $dumpFile; fi
 
-  if [[ "$CONTECO_STATIC_REST_BASE_CURL_LOGGING" == *"RESPONSE"* ]] ; then log-response $reqFile $resFile $((stop - start)); fi
+  if [[ "$CONTECO_STATIC_REST_BASE_API_LOGGING" == *"RESPONSE"* ]] ; then log-response $reqFile $resFile $((stop - start)); fi
 
   executionplane-complete
 )

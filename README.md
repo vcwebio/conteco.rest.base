@@ -9,7 +9,7 @@ This image is the base for API implementations based on bash scripts.
 
 This base image implements the execution of a request using curl.
 
-It implements a global flag for logging: CONTECO_STATIC_REST_BASE_CURL_LOGGING.  
+It implements a global flag for logging: CONTECO_STATIC_REST_BASE_API_LOGGING.  
 This flag can have 3 values - as a space delimited list - REQUEST RESPONSE TRACE.
 
 REQUEST  
